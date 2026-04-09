@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeOS</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f172a, #020617);
+  color: white;
+}
+
+.container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.streak {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #38bdf8;
+}
+
+.input-box {
+  display: flex;
+  gap: 10px;
+}
+
+input {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+  background: #1e293b;
+  color: white;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+.task {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(10px);
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: fadeIn 0.3s;
+}
+
+.task.done span {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.actions button {
+  margin-left: 5px;
+  background: #334155;
+}
+
+.lang-btn {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #1e293b;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+</style>
+</head>
+
+<body>
+
+<button class="lang-btn" onclick="toggleLang()">🌐</button>
+
+<div class="container">
+  <h1 id="title">LifeOS</h1>
+
+  <div class="streak" id="streakText">🔥 Streak: 0</div>
+
+  <div class="input-box">
+    <input id="taskInput" placeholder="Add task...">
+    <button onclick="addTask()" id="addBtn">Add</button>
+  </div>
+
+  <div id="tasks"></div>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let streak = JSON.parse(localStorage.getItem("streak")) || 0;
+let lang = "en";
+
+function render() {
+  const container = document.getElementById("tasks");
+  container.innerHTML = "";
+
+  tasks.forEach((task, index) => {
+    const div = document.createElement("div");
+    div.className = "task " + (task.done ? "done" : "");
+
+    div.innerHTML = `
+      <span>${task.text}</span>
+      <div class="actions">
+        <button onclick="toggleDone(${index})">✔️</button>
+        <button onclick="deleteTask(${index})">❌</button>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("streakText").innerText =
+    (lang === "en" ? "🔥 Streak: " : "🔥 عدد الأيام: ") + streak;
+
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+  localStorage.setItem("streak", JSON.stringify(streak));
+}
+
+function addTask() {
+  const input = document.getElementById("taskInput");
+  if (input.value.trim() === "") return;
+
+  tasks.push({ text: input.value, done: false });
+  input.value = "";
+  render();
+}
+
+function deleteTask(i) {
+  tasks.splice(i, 1);
+  render();
+}
+
+function toggleDone(i) {
+  tasks[i].done = !tasks[i].done;
+
+  if (tasks[i].done) {
+    streak++;
+  } else {
+    streak = Math.max(0, streak - 1);
+  }
+
+  render();
+}
+
+function toggleLang() {
+  lang = lang === "en" ? "ar" : "en";
+
+  document.getElementById("title").innerText =
+    lang === "en" ? "LifeOS" : "نظام حياتي";
+
+  document.getElementById("taskInput").placeholder =
+    lang === "en" ? "Add task..." : "أضف مهمة...";
+
+  document.getElementById("addBtn").innerText =
+    lang === "en" ? "Add" : "إضافة";
+
+  render();
+}
+
+render();
+</script>
+
+</body>
+</html>
