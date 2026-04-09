@@ -6,189 +6,168 @@
 <title>LifeOS</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
-
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #0f172a, #020617);
+  background: linear-gradient(135deg, #020617, #0f172a);
   color: white;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.container {
-  padding: 20px;
-  max-width: 600px;
-  margin: auto;
-}
-
-h1 {
+/* ===== Header ===== */
+.header {
   text-align: center;
-  margin-bottom: 10px;
+  margin-top: 30px;
+  font-size: 28px;
+  font-weight: bold;
 }
 
-.streak {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #38bdf8;
-}
-
-.input-box {
-  display: flex;
-  gap: 10px;
-}
-
-input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  outline: none;
-  background: #1e293b;
-  color: white;
-}
-
-button {
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: #3b82f6;
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover {
-  transform: scale(1.05);
-}
-
-.task {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(10px);
-  padding: 12px;
-  margin-top: 10px;
-  border-radius: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  animation: fadeIn 0.3s;
-}
-
-.task.done span {
-  text-decoration: line-through;
-  opacity: 0.5;
-}
-
-.actions button {
-  margin-left: 5px;
-  background: #334155;
-}
-
-.lang-btn {
+/* ===== Blur Overlay ===== */
+.blur {
   position: fixed;
-  top: 10px;
-  right: 10px;
-  background: #1e293b;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(10px);
+  top: 0;
+  left: 0;
+  display: none;
 }
 
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(10px);}
-  to {opacity: 1; transform: translateY(0);}
+/* ===== Bottom Nav ===== */
+.nav {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
 }
+
+/* ===== Buttons ===== */
+.circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(30, 41, 59, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 12px;
+}
+
+.circle:hover {
+  transform: scale(1.1);
+}
+
+/* ===== Add Button ===== */
+.add {
+  width: 75px;
+  height: 75px;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  font-size: 20px;
+  box-shadow: 0 0 25px rgba(59,130,246,0.7);
+}
+
+/* ===== Hidden Buttons ===== */
+.hidden {
+  display: none;
+}
+
+/* ===== Popup Menu ===== */
+.menu {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  flex-direction: column-reverse;
+  gap: 15px;
+}
+
+.menu .circle {
+  width: 65px;
+  height: 65px;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 12px;
+}
+
+/* Animation */
+.menu .circle {
+  animation: fadeUp 0.3s ease;
+}
+
+@keyframes fadeUp {
+  from {opacity:0; transform: translateY(20px);}
+  to {opacity:1; transform: translateY(0);}
+}
+
 </style>
 </head>
 
 <body>
 
-<button class="lang-btn" onclick="toggleLang()">🌐</button>
+<div class="header">LifeOS</div>
 
-<div class="container">
-  <h1 id="title">LifeOS</h1>
+<div class="blur" id="blur"></div>
 
-  <div class="streak" id="streakText">🔥 Streak: 0</div>
+<!-- Bottom Nav -->
+<div class="nav" id="nav">
+  <div class="circle">Manager</div>
+  <div class="circle">Today</div>
 
-  <div class="input-box">
-    <input id="taskInput" placeholder="Add task...">
-    <button onclick="addTask()" id="addBtn">Add</button>
-  </div>
+  <div class="circle add" onclick="toggleMenu()">＋</div>
 
-  <div id="tasks"></div>
+  <div class="circle">Streak</div>
+  <div class="circle">User</div>
+</div>
+
+<!-- Popup Menu -->
+<div class="menu" id="menu">
+  <div class="circle">Year</div>
+  <div class="circle">Month</div>
+  <div class="circle">Week</div>
+  <div class="circle">Task</div>
 </div>
 
 <script>
-let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
-let streak = JSON.parse(localStorage.getItem("streak")) || 0;
-let lang = "en";
+let open = false;
 
-function render() {
-  const container = document.getElementById("tasks");
-  container.innerHTML = "";
+function toggleMenu() {
+  const menu = document.getElementById("menu");
+  const blur = document.getElementById("blur");
+  const nav = document.getElementById("nav");
 
-  tasks.forEach((task, index) => {
-    const div = document.createElement("div");
-    div.className = "task " + (task.done ? "done" : "");
+  open = !open;
 
-    div.innerHTML = `
-      <span>${task.text}</span>
-      <div class="actions">
-        <button onclick="toggleDone(${index})">✔️</button>
-        <button onclick="deleteTask(${index})">❌</button>
-      </div>
-    `;
+  if (open) {
+    menu.style.display = "flex";
+    blur.style.display = "block";
 
-    container.appendChild(div);
-  });
+    // hide other buttons
+    [...nav.children].forEach((el, i) => {
+      if (!el.classList.contains("add")) {
+        el.classList.add("hidden");
+      }
+    });
 
-  document.getElementById("streakText").innerText =
-    (lang === "en" ? "🔥 Streak: " : "🔥 عدد الأيام: ") + streak;
-
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-  localStorage.setItem("streak", JSON.stringify(streak));
-}
-
-function addTask() {
-  const input = document.getElementById("taskInput");
-  if (input.value.trim() === "") return;
-
-  tasks.push({ text: input.value, done: false });
-  input.value = "";
-  render();
-}
-
-function deleteTask(i) {
-  tasks.splice(i, 1);
-  render();
-}
-
-function toggleDone(i) {
-  tasks[i].done = !tasks[i].done;
-
-  if (tasks[i].done) {
-    streak++;
   } else {
-    streak = Math.max(0, streak - 1);
+    menu.style.display = "none";
+    blur.style.display = "none";
+
+    [...nav.children].forEach(el => {
+      el.classList.remove("hidden");
+    });
   }
-
-  render();
 }
 
-function toggleLang() {
-  lang = lang === "en" ? "ar" : "en";
-
-  document.getElementById("title").innerText =
-    lang === "en" ? "LifeOS" : "نظام حياتي";
-
-  document.getElementById("taskInput").placeholder =
-    lang === "en" ? "Add task..." : "أضف مهمة...";
-
-  document.getElementById("addBtn").innerText =
-    lang === "en" ? "Add" : "إضافة";
-
-  render();
+// close when clicking blur
+document.getElementById("blur").onclick = () => {
+  if (open) toggleMenu();
 }
-
-render();
 </script>
 
 </body>
