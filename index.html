@@ -7,20 +7,30 @@
 
 <style>
 body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#020617,#0f172a);
-  color: white;
-  overflow: hidden;
+  margin:0;
+  font-family:'Segoe UI';
+  transition:0.3s;
+}
+
+/* LIGHT MODE */
+body.light {
+  background:#f1f5f9;
+  color:#0f172a;
+}
+
+/* DARK MODE */
+body.dark {
+  background:#020617;
+  color:white;
 }
 
 /* HEADER */
-.header { text-align:center; margin-top:40px; font-size:28px; }
-.streak { text-align:center; color:#f97316; font-size:22px; }
+.header {text-align:center;margin-top:30px;font-size:28px;}
+.streak {text-align:center;font-size:20px;}
 
 /* NAV */
 .nav {
-  position: fixed;
+  position:fixed;
   bottom:20px;
   width:100%;
   display:flex;
@@ -29,48 +39,91 @@ body {
 
 .circle {
   width:55px;height:55px;border-radius:50%;
-  background:rgba(30,41,59,0.7);
+  background:rgba(0,0,0,0.1);
   display:flex;align-items:center;justify-content:center;
   font-size:22px;
   transition:0.4s;
 }
 
-.add {
-  width:70px;height:70px;
-  background:linear-gradient(135deg,#3b82f6,#06b6d4);
+body.dark .circle {
+  background:rgba(255,255,255,0.1);
 }
 
-/* ACTIVE BUTTON */
-.active-btn {
+/* CENTER BUTTON */
+.center {
   position:fixed !important;
-  bottom:50%;left:50%;
-  transform:translate(-50%,50%) scale(1.5);
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%) scale(1.5);
   z-index:10;
 }
 
-.hidden {opacity:0;transform:scale(0.7);}
+/* HIDDEN */
+.hidden {opacity:0;transform:scale(0.6);}
 
-/* PAGES */
+/* PAGE */
 .page {
   position:fixed;
   bottom:-100%;
   width:100%;height:70%;
-  background:rgba(15,23,42,0.95);
+  background:rgba(255,255,255,0.95);
   transition:0.4s;
-  border-radius:25px 25px 0 0;
+  border-radius:20px 20px 0 0;
   padding:20px;
 }
 
-.page.active { bottom:0; }
+body.dark .page {
+  background:rgba(15,23,42,0.95);
+}
+
+.page.active {bottom:0;}
 
 /* BLUR */
 .blur {
   position:fixed;width:100%;height:100%;
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,0.2);
   display:none;
 }
 
-/* ADD MENU */
+/* HOME BUTTON */
+.home-btn {
+  position:absolute;
+  right:20px;
+  top:20px;
+  font-size:22px;
+  cursor:pointer;
+}
+
+/* CREATE */
+.create {
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:white;
+  display:none;
+  padding:20px;
+}
+
+body.dark .create {background:#020617;}
+
+input,textarea {
+  width:100%;padding:10px;margin:10px 0;
+  border-radius:10px;border:none;
+}
+
+/* FLAME */
+.flame {
+  font-size:30px;
+  filter:grayscale(1);
+  transition:0.3s;
+}
+
+.flame.active {
+  filter:none;
+  transform:scale(1.2);
+}
+
+/* MENU */
 .menu {
   position:fixed;
   bottom:120px;
@@ -82,50 +135,16 @@ body {
 }
 
 .menu div {
-  background:rgba(30,41,59,0.8);
-  padding:12px 20px;
-  border-radius:12px;
+  background:#3b82f6;
+  color:white;
+  padding:10px 20px;
+  border-radius:10px;
   text-align:center;
 }
-
-/* CREATE */
-.create {
-  position:fixed;
-  top:0;left:0;width:100%;height:100%;
-  background:#020617;
-  display:none;
-  padding:20px;
-}
-
-input,textarea {
-  width:100%;padding:10px;margin:10px 0;
-  border-radius:10px;border:none;
-  background:#1e293b;color:white;
-}
-
-.save {
-  width:70%;margin:auto;
-  background:#3b82f6;padding:12px;
-  text-align:center;border-radius:10px;
-}
-
-.flame {
-  font-size:28px;
-  color:gray;
-  transition:0.3s;
-}
-
-.flame.active {
-  color:#f97316;
-  text-shadow:0 0 10px orange;
-}
-
-/* SECTIONS */
-.section {margin-top:10px;}
 </style>
 </head>
 
-<body>
+<body class="light">
 
 <div class="header">LifeOS</div>
 <div class="streak">🔥 <span id="streakNum">0</span></div>
@@ -134,53 +153,41 @@ input,textarea {
 
 <!-- PAGES -->
 <div class="page" id="manager">
+  <div class="home-btn" onclick="goHome()">🏠</div>
   <h3>Manager</h3>
-  <button onclick="openNotif()">🔔</button>
-  <button onclick="openSettings()">⚙️</button>
-
-  <div class="section">Tasks</div>
-  <div id="taskList"></div>
-
-  <div class="section">Plans</div>
-  <div id="planList"></div>
-
-  <div class="section">Goals</div>
-  <div id="goalList"></div>
 </div>
 
 <div class="page" id="today">
+  <div class="home-btn" onclick="goHome()">🏠</div>
   <h3>Today</h3>
-  <div id="todayList"></div>
 </div>
 
 <div class="page" id="streakPage">
-  <h3>🔥 Streaks</h3>
-  <div id="streakList"></div>
+  <div class="home-btn" onclick="goHome()">🏠</div>
+  <h3>Streak</h3>
 </div>
 
 <div class="page" id="user">
+  <div class="home-btn" onclick="goHome()">🏠</div>
   <h3>User</h3>
-  <div>🌍 Language</div>
-  <div>🌑 Dark Mode</div>
+  <button onclick="toggleMode()">Toggle Mode</button>
 </div>
 
 <!-- CREATE -->
 <div class="create" id="create">
   <h2 id="createTitle"></h2>
 
-  <input id="title" placeholder="Title">
-  <textarea id="desc" placeholder="Description"></textarea>
+  <input placeholder="Title">
+  <textarea placeholder="Description"></textarea>
 
-  <div onclick="toggleFlame()" class="flame" id="flame">🔥</div>
-
-  <div class="save" onclick="saveItem()">Save</div>
+  <div class="flame" id="flame" onclick="toggleFlame()">🔥</div>
 </div>
 
 <!-- NAV -->
 <div class="nav" id="nav">
   <div class="circle" onclick="openPage(this,'manager')">🗂</div>
   <div class="circle" onclick="openPage(this,'today')">☀️</div>
-  <div class="circle add" onclick="toggleMenu()">➕</div>
+  <div class="circle" onclick="toggleMenu()">➕</div>
   <div class="circle" onclick="openPage(this,'streakPage')">🔥</div>
   <div class="circle" onclick="openPage(this,'user')">👤</div>
 </div>
@@ -193,88 +200,62 @@ input,textarea {
 </div>
 
 <script>
-let activeBtn=null, activePage=null, menuOpen=false;
-let data={tasks:[],plans:[],goals:[]};
-let flame=false, currentType="";
+let active=null;
 
 function openPage(btn,id){
   let page=document.getElementById(id);
 
-  if(activeBtn===btn){
-    btn.classList.remove("active-btn");
-    page.classList.remove("active");
-    [...nav.children].forEach(e=>e.classList.remove("hidden"));
-    activeBtn=null; return;
+  if(active===btn){
+    goHome();
+    return;
   }
 
-  [...nav.children].forEach(e=>{
-    if(e!==btn && !e.classList.contains("add")) e.classList.add("hidden");
+  document.querySelectorAll(".circle").forEach(e=>e.classList.add("hidden"));
+
+  btn.classList.remove("hidden");
+  btn.classList.add("center");
+
+  page.classList.add("active");
+  blur.style.display="block";
+
+  active=btn;
+}
+
+function goHome(){
+  document.querySelectorAll(".circle").forEach(e=>{
+    e.classList.remove("hidden","center");
   });
 
-  btn.classList.add("active-btn");
-  page.classList.add("active");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 
-  activeBtn=btn; activePage=page;
+  blur.style.display="none";
+  active=null;
 }
 
+/* MENU */
 function toggleMenu(){
-  menuOpen=!menuOpen;
-  menu.style.display=menuOpen?"flex":"none";
-  blur.style.display=menuOpen?"block":"none";
+  menu.style.display = menu.style.display==="flex"?"none":"flex";
 }
 
-blur.onclick=()=>toggleMenu();
-
+/* CREATE */
 function openCreate(type){
-  currentType=type;
   create.style.display="block";
   createTitle.innerText="Create "+type;
-  toggleMenu();
+  nav.style.display="none";
+  menu.style.display="none";
 }
 
+/* FLAME */
 function toggleFlame(){
-  flame=!flame;
-  flame?flameOn():flameOff();
+  flame.classList.toggle("active");
   navigator.vibrate(50);
 }
 
-function flameOn(){
-  flameEl.classList.add("active");
+/* MODE */
+function toggleMode(){
+  document.body.classList.toggle("dark");
+  document.body.classList.toggle("light");
 }
-function flameOff(){
-  flameEl.classList.remove("active");
-}
-
-let flameEl=document.getElementById("flame");
-
-function saveItem(){
-  let item={
-    title:document.getElementById("title").value,
-    streak:flame
-  };
-
-  if(currentType==="Task") data.tasks.push(item);
-  if(currentType==="Plan") data.plans.push(item);
-  if(currentType==="Goal") data.goals.push(item);
-
-  updateUI();
-  create.style.display="none";
-}
-
-function updateUI(){
-  taskList.innerHTML=data.tasks.map(t=>t.title).join("<br>");
-  planList.innerHTML=data.plans.map(t=>t.title).join("<br>");
-  goalList.innerHTML=data.goals.map(t=>t.title).join("<br>");
-
-  let streaks=[...data.tasks,...data.plans,...data.goals].filter(x=>x.streak);
-
-  streakList.innerHTML=streaks.map(s=>s.title).join("<br>");
-
-  streakNum.innerText=streaks.length>0?streaks.length:0;
-}
-
-function openNotif(){alert("Notifications")}
-function openSettings(){alert("Settings")}
 </script>
 
 </body>
