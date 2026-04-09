@@ -9,165 +9,272 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #020617, #0f172a);
+  background: linear-gradient(135deg,#020617,#0f172a);
   color: white;
-  height: 100vh;
   overflow: hidden;
 }
 
-/* ===== Header ===== */
-.header {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 28px;
-  font-weight: bold;
-}
+/* HEADER */
+.header { text-align:center; margin-top:40px; font-size:28px; }
+.streak { text-align:center; color:#f97316; font-size:22px; }
 
-/* ===== Blur Overlay ===== */
-.blur {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  backdrop-filter: blur(10px);
-  top: 0;
-  left: 0;
-  display: none;
-}
-
-/* ===== Bottom Nav ===== */
+/* NAV */
 .nav {
   position: fixed;
-  bottom: 20px;
-  width: 100%;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+  bottom:20px;
+  width:100%;
+  display:flex;
+  justify-content:space-evenly;
 }
 
-/* ===== Buttons ===== */
 .circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(30, 41, 59, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(10px);
-  cursor: pointer;
-  transition: 0.3s;
-  font-size: 12px;
+  width:55px;height:55px;border-radius:50%;
+  background:rgba(30,41,59,0.7);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  transition:0.4s;
 }
 
-.circle:hover {
-  transform: scale(1.1);
-}
-
-/* ===== Add Button ===== */
 .add {
-  width: 75px;
-  height: 75px;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  font-size: 20px;
-  box-shadow: 0 0 25px rgba(59,130,246,0.7);
+  width:70px;height:70px;
+  background:linear-gradient(135deg,#3b82f6,#06b6d4);
 }
 
-/* ===== Hidden Buttons ===== */
-.hidden {
-  display: none;
+/* ACTIVE BUTTON */
+.active-btn {
+  position:fixed !important;
+  bottom:50%;left:50%;
+  transform:translate(-50%,50%) scale(1.5);
+  z-index:10;
 }
 
-/* ===== Popup Menu ===== */
+.hidden {opacity:0;transform:scale(0.7);}
+
+/* PAGES */
+.page {
+  position:fixed;
+  bottom:-100%;
+  width:100%;height:70%;
+  background:rgba(15,23,42,0.95);
+  transition:0.4s;
+  border-radius:25px 25px 0 0;
+  padding:20px;
+}
+
+.page.active { bottom:0; }
+
+/* BLUR */
+.blur {
+  position:fixed;width:100%;height:100%;
+  backdrop-filter:blur(8px);
+  display:none;
+}
+
+/* ADD MENU */
 .menu {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: none;
-  flex-direction: column-reverse;
-  gap: 15px;
+  position:fixed;
+  bottom:120px;
+  left:50%;
+  transform:translateX(-50%);
+  display:none;
+  flex-direction:column-reverse;
+  gap:10px;
 }
 
-.menu .circle {
-  width: 65px;
-  height: 65px;
-  background: rgba(15, 23, 42, 0.9);
-  font-size: 12px;
+.menu div {
+  background:rgba(30,41,59,0.8);
+  padding:12px 20px;
+  border-radius:12px;
+  text-align:center;
 }
 
-/* Animation */
-.menu .circle {
-  animation: fadeUp 0.3s ease;
+/* CREATE */
+.create {
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:#020617;
+  display:none;
+  padding:20px;
 }
 
-@keyframes fadeUp {
-  from {opacity:0; transform: translateY(20px);}
-  to {opacity:1; transform: translateY(0);}
+input,textarea {
+  width:100%;padding:10px;margin:10px 0;
+  border-radius:10px;border:none;
+  background:#1e293b;color:white;
 }
 
+.save {
+  width:70%;margin:auto;
+  background:#3b82f6;padding:12px;
+  text-align:center;border-radius:10px;
+}
+
+.flame {
+  font-size:28px;
+  color:gray;
+  transition:0.3s;
+}
+
+.flame.active {
+  color:#f97316;
+  text-shadow:0 0 10px orange;
+}
+
+/* SECTIONS */
+.section {margin-top:10px;}
 </style>
 </head>
 
 <body>
 
 <div class="header">LifeOS</div>
+<div class="streak">🔥 <span id="streakNum">0</span></div>
 
 <div class="blur" id="blur"></div>
 
-<!-- Bottom Nav -->
-<div class="nav" id="nav">
-  <div class="circle">Manager</div>
-  <div class="circle">Today</div>
+<!-- PAGES -->
+<div class="page" id="manager">
+  <h3>Manager</h3>
+  <button onclick="openNotif()">🔔</button>
+  <button onclick="openSettings()">⚙️</button>
 
-  <div class="circle add" onclick="toggleMenu()">＋</div>
+  <div class="section">Tasks</div>
+  <div id="taskList"></div>
 
-  <div class="circle">Streak</div>
-  <div class="circle">User</div>
+  <div class="section">Plans</div>
+  <div id="planList"></div>
+
+  <div class="section">Goals</div>
+  <div id="goalList"></div>
 </div>
 
-<!-- Popup Menu -->
+<div class="page" id="today">
+  <h3>Today</h3>
+  <div id="todayList"></div>
+</div>
+
+<div class="page" id="streakPage">
+  <h3>🔥 Streaks</h3>
+  <div id="streakList"></div>
+</div>
+
+<div class="page" id="user">
+  <h3>User</h3>
+  <div>🌍 Language</div>
+  <div>🌑 Dark Mode</div>
+</div>
+
+<!-- CREATE -->
+<div class="create" id="create">
+  <h2 id="createTitle"></h2>
+
+  <input id="title" placeholder="Title">
+  <textarea id="desc" placeholder="Description"></textarea>
+
+  <div onclick="toggleFlame()" class="flame" id="flame">🔥</div>
+
+  <div class="save" onclick="saveItem()">Save</div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="nav">
+  <div class="circle" onclick="openPage(this,'manager')">🗂</div>
+  <div class="circle" onclick="openPage(this,'today')">☀️</div>
+  <div class="circle add" onclick="toggleMenu()">➕</div>
+  <div class="circle" onclick="openPage(this,'streakPage')">🔥</div>
+  <div class="circle" onclick="openPage(this,'user')">👤</div>
+</div>
+
+<!-- MENU -->
 <div class="menu" id="menu">
-  <div class="circle">Year</div>
-  <div class="circle">Month</div>
-  <div class="circle">Week</div>
-  <div class="circle">Task</div>
+  <div onclick="openCreate('Goal')">Goal</div>
+  <div onclick="openCreate('Plan')">Plan</div>
+  <div onclick="openCreate('Task')">Task</div>
 </div>
 
 <script>
-let open = false;
+let activeBtn=null, activePage=null, menuOpen=false;
+let data={tasks:[],plans:[],goals:[]};
+let flame=false, currentType="";
 
-function toggleMenu() {
-  const menu = document.getElementById("menu");
-  const blur = document.getElementById("blur");
-  const nav = document.getElementById("nav");
+function openPage(btn,id){
+  let page=document.getElementById(id);
 
-  open = !open;
-
-  if (open) {
-    menu.style.display = "flex";
-    blur.style.display = "block";
-
-    // hide other buttons
-    [...nav.children].forEach((el, i) => {
-      if (!el.classList.contains("add")) {
-        el.classList.add("hidden");
-      }
-    });
-
-  } else {
-    menu.style.display = "none";
-    blur.style.display = "none";
-
-    [...nav.children].forEach(el => {
-      el.classList.remove("hidden");
-    });
+  if(activeBtn===btn){
+    btn.classList.remove("active-btn");
+    page.classList.remove("active");
+    [...nav.children].forEach(e=>e.classList.remove("hidden"));
+    activeBtn=null; return;
   }
+
+  [...nav.children].forEach(e=>{
+    if(e!==btn && !e.classList.contains("add")) e.classList.add("hidden");
+  });
+
+  btn.classList.add("active-btn");
+  page.classList.add("active");
+
+  activeBtn=btn; activePage=page;
 }
 
-// close when clicking blur
-document.getElementById("blur").onclick = () => {
-  if (open) toggleMenu();
+function toggleMenu(){
+  menuOpen=!menuOpen;
+  menu.style.display=menuOpen?"flex":"none";
+  blur.style.display=menuOpen?"block":"none";
 }
+
+blur.onclick=()=>toggleMenu();
+
+function openCreate(type){
+  currentType=type;
+  create.style.display="block";
+  createTitle.innerText="Create "+type;
+  toggleMenu();
+}
+
+function toggleFlame(){
+  flame=!flame;
+  flame?flameOn():flameOff();
+  navigator.vibrate(50);
+}
+
+function flameOn(){
+  flameEl.classList.add("active");
+}
+function flameOff(){
+  flameEl.classList.remove("active");
+}
+
+let flameEl=document.getElementById("flame");
+
+function saveItem(){
+  let item={
+    title:document.getElementById("title").value,
+    streak:flame
+  };
+
+  if(currentType==="Task") data.tasks.push(item);
+  if(currentType==="Plan") data.plans.push(item);
+  if(currentType==="Goal") data.goals.push(item);
+
+  updateUI();
+  create.style.display="none";
+}
+
+function updateUI(){
+  taskList.innerHTML=data.tasks.map(t=>t.title).join("<br>");
+  planList.innerHTML=data.plans.map(t=>t.title).join("<br>");
+  goalList.innerHTML=data.goals.map(t=>t.title).join("<br>");
+
+  let streaks=[...data.tasks,...data.plans,...data.goals].filter(x=>x.streak);
+
+  streakList.innerHTML=streaks.map(s=>s.title).join("<br>");
+
+  streakNum.innerText=streaks.length>0?streaks.length:0;
+}
+
+function openNotif(){alert("Notifications")}
+function openSettings(){alert("Settings")}
 </script>
 
 </body>
